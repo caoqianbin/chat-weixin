@@ -37,7 +37,9 @@ function help(){
      //处理其他类型消息
         switch(wxmsg.MsgType){
             case 'image' :
-                
+                retmsg.msgtype=wxmsg.MsgType;
+                retmsg.msg = wxmsg.MediaId;
+                return formatMsg(retmsg);
             case 'voice':
                 retmsg.msgtype=wxmsg.MsgType;
                 retmsg.msg = wxmsg.MediaId;
@@ -51,11 +53,35 @@ function help(){
      
  }
 
-exports.help = help;
-exports.userMsg = userMsg;
+function eventMsg(wxmsg,retmsg){
+    //把返回仙子的类型设置为text
+    retmsg.msgtype = 'text';
+    switch(wxmsg.Event){
+        case 'subscribe':
+            retmsg.msg = '你好，这是一个测试号，尽管没什么用，还是感谢您的关注';
+            return formatMsg(retmsg);
+        case 'unsubscribe':
+            console.log(wxmsg.fromUserName,'取消关注');
+            break;
+        case 'CLICK':
+            retmsg.msg = wxmsg.EventKey;
+            return formatMsg(retmsg);
+        case 'VIEW':
+            console.log('用户浏览',wxmsg.EventKey);
+            break;
+        default:
+            return '';
+    }
+    return '';
+}
+
+
 
 //后续还会加入时间消息支持
 exports.msgDispatch = function(wxmsg,retmsg){
+    if(wxmsg.MsgType == 'event'){
+        return eventMsg(wxmsg,retmsg);
+    }
     return userMsg(wxmsg,retmsg);
 }
 
